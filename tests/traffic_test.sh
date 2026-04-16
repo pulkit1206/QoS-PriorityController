@@ -1,29 +1,15 @@
 #!/bin/bash
-# Run this inside Mininet CLI using:
-# mininet> sh bash tests/traffic_test.sh
+echo "=== QoS Traffic Test ==="
 
-echo "=== Starting QoS Traffic Test ==="
+echo "Test 1: VoIP (UDP - should be fastest)"
+h1 iperf -c 10.0.0.3 -u -b 5m -t 5
 
-# Start iperf server on h3
-echo "Starting iperf server on h3..."
-mx h3 iperf -s &
+echo "Test 2: HTTP (TCP port 80 - medium)"
+h2 iperf -c 10.0.0.3 -p 80 -t 5
 
-sleep 1
+echo "Test 3: FTP (TCP port 21 - lowest)"
+h2 iperf -c 10.0.0.3 -p 21 -t 5
 
-echo ""
-echo "=== Test 1: VoIP (UDP high priority) ==="
-mx h1 iperf -c 10.0.0.3 -u -b 5m -t 5
-
-echo ""
-echo "=== Test 2: HTTP (TCP medium priority) ==="
-mx h2 iperf -c 10.0.0.3 -b 5m -t 5
-
-echo ""
-echo "=== Test 3: Competing traffic ==="
-echo "Running VoIP and FTP simultaneously..."
-mx h1 iperf -c 10.0.0.3 -u -b 5m -t 10 &
-mx h2 iperf -c 10.0.0.3 -b 5m -t 10
-
-echo ""
-echo "=== Test Complete ==="
-kill %1 2>/dev/null
+echo "Test 4: Competing traffic"
+h1 iperf -c 10.0.0.3 -u -b 5m -t 10 &
+h2 iperf -c 10.0.0.3 -t 10
