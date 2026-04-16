@@ -1,0 +1,60 @@
+dps:
+  qos-switch:
+    dp_id: 0x1
+    hardware: "Open vSwitch"
+    interfaces:
+      1:
+        name: "host1"
+        description: "High priority host - VoIP"
+        native_vlan: 100
+        acl_in: voip
+      2:
+        name: "host2"
+        description: "Medium priority host - HTTP"
+        native_vlan: 100
+        acl_in: http
+      3:
+        name: "host3"
+        description: "Low priority host - FTP"
+        native_vlan: 100
+        acl_in: ftp
+
+vlans:
+  100:
+    name: "qos-vlan"
+
+acls:
+  voip:
+    - rule:
+        nw_proto: 17        # UDP - VoIP traffic
+        dl_type: 0x0800
+        actions:
+          allow: 1
+          queue: 0          # highest priority
+    - rule:
+        actions:
+          allow: 1
+
+  http:
+    - rule:
+        nw_proto: 6         # TCP - HTTP traffic
+        dl_type: 0x0800
+        tcp_dst: 80
+        actions:
+          allow: 1
+          queue: 1          # medium priority
+    - rule:
+        actions:
+          allow: 1
+
+  ftp:
+    - rule:
+        nw_proto: 6         # TCP - FTP traffic
+        dl_type: 0x0800
+        tcp_dst: 21
+        actions:
+          allow: 1
+          queue: 2          # lowest priority
+    - rule:
+        actions:
+          allow: 1
